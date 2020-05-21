@@ -1,5 +1,6 @@
 
 # Light CNN for Deep Face Recognition, in pytorch
+## Thanks for code provided by the author. In this folder, some changes are making to adapt the new versions of Pytorch.
 A [pytorch](http://pytorch.org/) implementation of [A Light CNN for Deep Face Representation with Noisy Labels](https://arxiv.org/abs/1511.02683) from the paper by Xiang Wu, Ran He, Zhenan Sun and Tieniu Tan.  The official and original Caffe code can be found [here](https://github.com/AlfredXiangWu/face_verification_experiment).  
 
 ### Table of Contents
