@@ -3,10 +3,14 @@
     @author: Alfred Xiang Wu
     @date: 2017.07.04
 '''
+
 """
     Changed parts:
-    1. 
+    1. Delete Variable opration;
+    2. Fix a bug in top.update();
+    3. Add pretrain augment;
 """
+
 from __future__ import print_function
 import argparse
 import os
@@ -60,6 +64,8 @@ parser.add_argument('--save_path', default='', type=str, metavar='PATH',
                     help='path to save checkpoint (default: none)')
 parser.add_argument('--num_classes', default=99891, type=int,
                     metavar='N', help='number of classes (default: 99891)')
+parser.add_argument('--pretrain', default='', type=str, metavar='PATH',
+                    help='path to pretrained checkpoint (default: none)')
 
 def main():
     global args
@@ -97,6 +103,19 @@ def main():
     optimizer = torch.optim.SGD(params, args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+
+    # Load the parametes from a pre-trained model
+    if args.pretrain:
+        if os.path.isfile(args.pretrain):
+            print("=> loading checkpoint '{}'".format(args.pretrain))
+            checkpoint = torch.load(args.pretrain)
+            try:
+                model.load_state_dict(checkpoint['state_dict'])
+                print("=> loaded checkpoint '{}' (epoch {})".format(args.pretrain))
+            except:
+                pass
+        else:
+            print("=> no checkpoint found at '{}'".format(args.pretrain))
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -174,18 +193,16 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         input      = input.cuda()
         target     = target.cuda()
-        input_var  = torch.autograd.Variable(input)
-        target_var = torch.autograd.Variable(target)
 
         # compute output
-        output, _ = model(input_var)
-        loss   = criterion(output, target_var)
+        output, _ = model(input)
+        loss   = criterion(output, target)
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output.data, target, topk=(1,5))
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top5.update(prec5[0], input.size(0))
+        losses.update(loss.data, input.size(0))
+        top1.update(prec1, input.size(0))
+        top5.update(prec5, input.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -219,18 +236,16 @@ def validate(val_loader, model, criterion):
     for i, (input, target) in enumerate(val_loader):
         input      = input.cuda()
         target     = target.cuda()
-        input_var  = torch.autograd.Variable(input, volatile=True)
-        target_var = torch.autograd.Variable(target, volatile=True)
 
         # compute output
-        output, _ = model(input_var)
-        loss   = criterion(output, target_var)
+        output, _ = model(input)
+        loss   = criterion(output, target)
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output.data, target, topk=(1,5))
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top5.update(prec5[0], input.size(0))
+        losses.update(loss.data, input.size(0))
+        top1.update(prec1, input.size(0))
+        top5.update(prec5, input.size(0))
 
 
     print('\nTest set: Average loss: {}, Accuracy: ({})\n'.format(losses.avg, top1.avg))
