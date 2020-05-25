@@ -1,16 +1,13 @@
-'''
+"""
     implement training process for Light CNN
     @author: Alfred Xiang Wu
     @date: 2017.07.04
-'''
 
-"""
-    Changed parts:
+    Changed parts by Lucas Lu:
     1. Delete Variable opration;
     2. Fix a bug in top.update();
-    3. Add pretrain augment;
+    3. Add pretrain augment, which is different from resume one.
 """
-
 from __future__ import print_function
 import argparse
 import os
