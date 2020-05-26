@@ -1,8 +1,11 @@
-'''
+"""
     implement the feature extractions for light CNN
     @author: Alfred Xiang Wu
     @date: 2017.07.04
-'''
+    
+    Changed parts:
+    1. np.save() to replace the old .feat;
+"""
 
 from __future__ import print_function
 import argparse
@@ -57,7 +60,8 @@ def main():
 
     model.eval()
     if args.cuda:
-        model = torch.nn.DataParallel(model).cuda()
+        model = model.cuda()
+        # model = torch.nn.DataParallel(model).cuda()
 
     if args.resume:
         if os.path.isfile(args.resume):
@@ -74,6 +78,7 @@ def main():
     for img_name in img_list:
         count = count + 1
         img   = cv2.imread(os.path.join(args.root_path, img_name), cv2.IMREAD_GRAYSCALE)
+        img   = cv2.resize((128, 128))
         img   = np.reshape(img, (128, 128, 1))
         img   = transform(img)
         input[0,:,:,:] = img
@@ -103,10 +108,7 @@ def save_feature(save_path, img_name, features):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
     fname = os.path.splitext(img_path)[0]
-    fname = fname + '.feat'
-    fid   = open(fname, 'wb')
-    fid.write(features)
-    fid.close()
+    np.save(fname, features)
 
 if __name__ == '__main__':
     main()
