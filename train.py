@@ -106,9 +106,12 @@ def main():
         if os.path.isfile(args.pretrain):
             print("=> loading checkpoint '{}'".format(args.pretrain))
             checkpoint = torch.load(args.pretrain)
+            pretrained = {k.replace('module.', ''): v 
+                          for k, v in checkpoint['state_dict'].items() 
+                          if k.replace('module.', '') in model.state_dict()}
             try:
-                model.load_state_dict(checkpoint['state_dict'])
                 print("=> loaded checkpoint '{}' (epoch {})".format(args.pretrain))
+                model.load_state_dict(pretrained)
             except:
                 pass
         else:
